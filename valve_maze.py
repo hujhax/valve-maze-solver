@@ -1,40 +1,16 @@
-from collections import namedtuple
 import itertools
+import sys
 
-Exit = namedtuple('NamedTuple', 'junction exit')
-
-
-def get_edges():
-    '''
-    Return the exit connections for triangle_maze.jpg.
-    '''
-    edge_list = [
-        [Exit(0, 0), Exit(1, 0)],
-        [Exit(1, 1), Exit(2, 0)],
-        [Exit(1, 2), Exit(4, 2)],
-        [Exit(2, 1), Exit(3, 0)],
-        [Exit(2, 2), Exit(4, 0)],
-        [Exit(4, 1), Exit(5, 0)]
-    ]
-
-    edges = {}
-    for edge_pair in edge_list:
-        a, b = edge_pair
-        edges[a] = b
-        edges[b] = a
-
-    return edges
+from utils import Exit
 
 
-def get_junctions():
-    '''
-    Return the junction/valve info for triangle_maze.jpg.
-    '''
-    dead_end = {'connection_lists': [[]], 'spin': 0, 'max_spin': 0}
-    triangle = {'connection_lists': [[+1], [-1], []], 'spin': 0, 'max_spin': 2}
+def prep_junctions(junctions):
+    def add_defaults(j):
+        j['spin'] = 0
+        j.setdefault('max_spin', len(j['connection_lists']))
+        return j
 
-    # shallow clones
-    return [dict(dead_end), dict(triangle), dict(triangle), dict(dead_end), dict(triangle), dict(dead_end)]
+    return [add_defaults(j) for j in junctions]
 
 
 def calculate_flow(edges, junctions, source):
@@ -65,12 +41,7 @@ def calculate_flow(edges, junctions, source):
     return active_exits
 
 
-def hits_sprinklers(exits):
-    sprinklers = [
-        set([Exit(1, 1), Exit(2, 0)]),
-        set([Exit(1, 2), Exit(4, 2)])
-    ]
-
+def hits_sprinklers(sprinklers, exits):
     for sprinkler in sprinklers:
         if not exits & sprinkler:
             return False
@@ -79,12 +50,17 @@ def hits_sprinklers(exits):
 
 
 if __name__ == "__main__":
-    edges = get_edges()
-    junctions = get_junctions()
-    source = Exit(0, 0)
+    maze_name = sys.argv[1]
+    __import__(maze_name)
+    maze = sys.modules[maze_name]
+
+    edges = maze.get_edges()
+    junctions = prep_junctions(maze.get_junctions())
+    source = maze.get_source()
+    sprinklers = maze.get_sprinklers()
 
     # calculate all possible rotation combos for valves
-    rotation_lists = [range(0, junction['max_spin']+1) for junction in junctions]
+    rotation_lists = [range(junction['max_spin']) for junction in junctions]
 
     rotations = list(itertools.product(*rotation_lists))
 
@@ -94,5 +70,5 @@ if __name__ == "__main__":
 
         exits = calculate_flow(edges, junctions, source)
 
-        if hits_sprinklers(exits):
-            print "Rotation {0}: exits = {1}".format([rotation[i] for i in [1, 2, 4]], exits)
+        if hits_sprinklers(sprinklers, exits):
+            print "Rotation {0}: exits = {1}".format(rotation, exits)
