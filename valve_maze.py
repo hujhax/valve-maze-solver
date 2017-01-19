@@ -1,4 +1,5 @@
 from collections import namedtuple
+import itertools
 
 Exit = namedtuple('NamedTuple', 'junction exit')
 
@@ -63,9 +64,35 @@ def calculate_flow(edges, junctions, source):
 
     return active_exits
 
+
+def hits_sprinklers(exits):
+    sprinklers = [
+        set([Exit(1, 1), Exit(2, 0)]),
+        set([Exit(1, 2), Exit(4, 2)])
+    ]
+
+    for sprinkler in sprinklers:
+        if not exits & sprinkler:
+            return False
+
+    return True
+
+
 if __name__ == "__main__":
     edges = get_edges()
     junctions = get_junctions()
     source = Exit(0, 0)
 
-    print calculate_flow(edges, junctions, source)
+    # calculate all possible rotation combos for valves
+    rotation_lists = [range(0, junction['max_spin']+1) for junction in junctions]
+
+    rotations = list(itertools.product(*rotation_lists))
+
+    for rotation in rotations:
+        for spin, junction in zip(rotation, junctions):
+            junction['spin'] = spin
+
+        exits = calculate_flow(edges, junctions, source)
+
+        if hits_sprinklers(exits):
+            print "Rotation {0}: exits = {1}".format([rotation[i] for i in [1, 2, 4]], exits)
