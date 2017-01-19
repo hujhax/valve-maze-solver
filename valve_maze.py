@@ -30,9 +30,10 @@ def get_junctions():
     Return the junction/valve info for triangle_maze.jpg.
     '''
     dead_end = {'connection_lists': [[]], 'spin': 0, 'max_spin': 0}
-    triangle = {'connection_lists': [[1], [0], []], 'spin': 0, 'max_spin': 2}
+    triangle = {'connection_lists': [[+1], [-1], []], 'spin': 0, 'max_spin': 2}
 
-    return [dead_end, triangle, triangle, dead_end, triangle, dead_end]
+    # shallow clones
+    return [dict(dead_end), dict(triangle), dict(triangle), dict(dead_end), dict(triangle), dict(dead_end)]
 
 
 def calculate_flow(edges, junctions, source):
@@ -46,16 +47,16 @@ def calculate_flow(edges, junctions, source):
         new_exits = set()
 
         for active_exit in active_exits:
-
             far_end_of_the_edge = edges[active_exit]
             junction_index = far_end_of_the_edge.junction
             junction = junctions[junction_index]
             entrance = far_end_of_the_edge.exit
+            num_valves = len(junction['connection_lists'])
 
-            index = (entrance + junction['spin']) % len(junction['connection_lists'])
+            index = (entrance + junction['spin']) % num_valves
 
-            for connected_exit in junction['connection_lists'][index]:
-                new_exits.add(Exit(junction_index, connected_exit))
+            for connection_offset in junction['connection_lists'][index]:
+                new_exits.add(Exit(junction_index, (entrance + connection_offset) % num_valves))
 
         old_active_exits = set(active_exits)  # shallow clone
         active_exits.update(new_exits)
