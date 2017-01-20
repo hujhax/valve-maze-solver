@@ -36,12 +36,12 @@ def get_junctions():
 
     return [
         dict(dead_end),  # shallow clones
-        {'connection_lists': [[+2], [+2], [-2], [-2]], 'max_spin': 2},
+        {'connection_lists': [[+2], [+2], [-2], [-2]], 'max_spin': 1},
         dict(dead_end),
         dict(triangle),
         {'connection_lists': [[+1], [-1], [+1, +2], [+1, -1], [-1, -2]]},
-        {'connection_lists': [[+1, +3], [-1, +2], [], [-2, -3]]},
-        {'connection_lists': [[+3], [], [+2], [-3], [-2]]},
+        {'connection_lists': [[+1], [-1], [+1], [-1]], 'max_spin': 2},
+        {'connection_lists': [[], [], [+2], [], [-2]]},
         {'connection_lists': [[+2], [], [-2], []], 'max_spin': 2},
         dict(triangle)
     ]
