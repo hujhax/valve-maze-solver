@@ -35,6 +35,6 @@ def get_source():
 
 def get_sprinklers():
     return [
-        set([Exit(1, 1), Exit(2, 0)]),
-        set([Exit(1, 2), Exit(4, 2)])
+        [Exit(1, 1), Exit(2, 0)],
+        [Exit(1, 2), Exit(4, 2)]
     ]

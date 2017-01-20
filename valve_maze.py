@@ -23,7 +23,7 @@ def calculate_flow(edges, junctions, source):
     while old_active_exits != active_exits:
         new_exits = set()
 
-        for active_exit in active_exits:
+        for active_exit in (active_exits - old_active_exits):  # new active exits
             far_end_of_the_edge = edges[active_exit]
             junction_index = far_end_of_the_edge.junction
             junction = junctions[junction_index]
@@ -43,7 +43,7 @@ def calculate_flow(edges, junctions, source):
 
 def hits_sprinklers(sprinklers, exits):
     for sprinkler in sprinklers:
-        if not exits & sprinkler:
+        if not exits & set(sprinkler):
             return False
 
     return True
