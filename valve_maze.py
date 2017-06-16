@@ -20,6 +20,7 @@ def prep_valves(valves):
 
         def flip_set(connection_set):
             return [flip_hash[connection] for connection in connection_set]
+
         valve['flip_connection_sets'] = [flip_set(connection_set) for connection_set in valve['connection_sets']]
 
         # convert the connection sets to (faster but cryptic) 'connection hashes'
@@ -27,7 +28,7 @@ def prep_valves(valves):
             valve_hash = {}
             for connection_set in connection_sets:
                 for connector in connection_set:
-                    valve_hash[connector] = list(set(connector_set) - set([connector]))
+                    valve_hash[connector] = list(set(connection_set) - set([connector]))
             return valve_hash
 
         valve['connection_hash'] = connection_hash(valve['connection_sets'])
@@ -46,7 +47,8 @@ def find_active_exits(pipes, valves, source_entrance):
                     for valve in valves]
 
     def run_through_valve(entrance):
-        exits = valve_hashes[entrance.valve][entrance.index]
+
+        exits = valve_hashes[entrance.valve].get(entrance.index, [])
         return [Exit(entrance.valve, exit) for exit in exits]
 
     def run_through_pipes(entrance):
@@ -62,7 +64,8 @@ def find_active_exits(pipes, valves, source_entrance):
             valve_entrances = run_through_pipes(active_exit)
             for valve_entrance in valve_entrances:
                 valve_exits = run_through_valve(valve_entrance)
-                new_exits.add(valve_exits)
+
+                new_exits.update(valve_exits)
 
         old_active_exits = set(active_exits)  # shallow clone
         active_exits.update(new_exits)
@@ -88,6 +91,7 @@ def output_solution(valves):
     print ''
 
 if __name__ == "__main__":
+
     maze_name = sys.argv[1]
     __import__(maze_name)
     maze = sys.modules[maze_name]
@@ -101,14 +105,14 @@ if __name__ == "__main__":
     valve_permutations = itertools.permutations(master_valve_list)
 
     # calculate all possible flip combos for valves
-    flip_combos = list(itertools.product(*([[True, False]]*len(master_valve_list)))
+    flip_combos = list(itertools.product(*([[True, False]]*len(master_valve_list))))
 
     for valves in valve_permutations:
         for flip_combo in flip_combos:
             for valve, flip in zip(valves, flip_combo):
-                valve['flip']=flip
+                valve['flip'] = flip
 
-            all_active_exits=find_active_exits(pipes, valves, source_entrance)
+            all_active_exits = find_active_exits(pipes, valves, source_entrance)
 
             if hits_sprinklers(sprinklers, all_active_exits):
                 output_solution(valves)

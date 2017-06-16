@@ -6,7 +6,7 @@ def get_pipes():
     Return the sets of connections for the pipes that connect the valves.
     '''
     return [
-        [Exit(0, 1), Exit(1, 3)],
+        [Exit(0, 1), Exit(1, 2)],
         [Exit(0, 2), Exit(1, 0)],
         [Exit(0, 4), Exit(1, 4)],
         [Exit(1, 3), Exit(1, 5)]
